@@ -11,7 +11,7 @@ class Doer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name='Doer profile')
     phone_no = models.CharField(max_length=20, null=True, blank=True, verbose_name='Doer phone no')
     profile_pic = models.ImageField(null=True, blank=True, upload_to='upload/profile_pictures', verbose_name='Profile picture')
-    average_mark = models.DecimalField(max_digits=3, decimal_places=2)
+    average_mark = models.DecimalField(max_digits=3, decimal_places=2, null=True, blank=True)
     professions = models.ManyToManyField(Profession)
     AVAILABILITY_CHOICES = (
        ('A', 'Available'),

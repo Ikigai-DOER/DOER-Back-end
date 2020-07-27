@@ -118,3 +118,4 @@ GitHub.sublime-settings
 backend_venv/
 backend_venv
 
+**/migrations/**
