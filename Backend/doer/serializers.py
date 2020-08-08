@@ -14,7 +14,7 @@ class EmployerSerializer(serializers.ModelSerializer):
 class DoerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Doer
-        fields = ['user', 'phone_no', 'profile_pic', 'average_mark', 'professions', 'availability', 'user_rating']
+        fields = ['user', 'user.first_name', 'user.last_name', 'user.email', 'phone_no', 'profile_pic', 'average_mark', 'professions', 'availability', 'user_rating']
 
     user_rating = serializers.SerializerMethodField()
 
@@ -31,11 +31,16 @@ class ProfessionSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-# TODO: create function request user (EMPLOYER ONLY)
 class RequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = Request
-        fields = '__all__'
+        fields = ['title', 'description', 'professions', 'doer', 'publication_date', 'expiration_date', 'location', 'price', 'status']
+
+    def create(self, validate_data):
+        request_user = self.context['request'].user
+
+        if employer := Employer.objects.filter(user=request_user).first():
+            return Request.objects.create(employer=employer, **validated_data)
 
 
 class RequestSubmissionSerializer(serializers.ModelSerializer):
