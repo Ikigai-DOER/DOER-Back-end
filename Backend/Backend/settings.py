@@ -52,6 +52,7 @@ MIDDLEWARE = [
 ]
 
 ALLOWED_HOSTS = ['127.0.0.1']
+
 CORS_ORIGIN_ALLOW_ALL = True
 
 ROOT_URLCONF = 'Backend.urls'
