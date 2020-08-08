@@ -14,7 +14,7 @@ class EmployerSerializer(serializers.ModelSerializer):
 class DoerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Doer
-        fields = ['user', 'user.first_name', 'user.last_name', 'user.email', 'phone_no', 'profile_pic', 'average_mark', 'professions', 'availability', 'user_rating']
+        fields = ['user', 'phone_no', 'profile_pic', 'average_mark', 'professions', 'availability', 'user_rating']
 
     user_rating = serializers.SerializerMethodField()
 

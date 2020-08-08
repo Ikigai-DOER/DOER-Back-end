@@ -25,8 +25,6 @@ SECRET_KEY = '*d^6302khuf&2re173=@d+24yb3@@_4e^jj0oj90y3wfem79a%'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
 
 # Application definition
 
@@ -52,6 +50,9 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+ALLOWED_HOSTS = ['127.0.0.1']
+CORS_ORIGIN_ALLOW_ALL = True
 
 ROOT_URLCONF = 'Backend.urls'
 
