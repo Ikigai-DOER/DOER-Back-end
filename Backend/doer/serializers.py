@@ -28,7 +28,7 @@ class DoerSerializer(serializers.ModelSerializer):
             return rating.rate
 
     def get_username(self, obj):
-        return User.objects.filter(id=obj.user.id).first().first_name
+        return User.objects.filter(id=obj.user.id).first().username
 
     def get_first_name(self, obj):
         return User.objects.filter(id=obj.user.id).first().first_name
