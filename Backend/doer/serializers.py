@@ -14,15 +14,27 @@ class EmployerSerializer(serializers.ModelSerializer):
 class DoerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Doer
-        fields = ['user', 'phone_no', 'profile_pic', 'average_mark', 'professions', 'availability', 'user_rating']
+        fields = ['username', 'first_name', 'last_name', 'phone_no', 'profile_pic', 'average_mark', 'professions', 'availability', 'user_rating']
 
     user_rating = serializers.SerializerMethodField()
+    username = serializers.SerializerMethodField()
+    first_name = serializers.SerializerMethodField()
+    last_name = serializers.SerializerMethodField()
 
     def get_user_rating(self, obj):
         request_user = self.context['request'].user
 
-        if rating := Rating.objects.filter(rater=request_user, ratee=obj.user).first():
+        if request_user.is_authenticated and (rating := Rating.objects.filter(rater=request_user, ratee=obj.user).first()):
             return rating.rate
+
+    def get_username(self, obj):
+        return User.objects.filter(id=obj.user.id).first().first_name
+
+    def get_first_name(self, obj):
+        return User.objects.filter(id=obj.user.id).first().first_name
+
+    def get_last_name(self, obj):
+        return User.objects.filter(id=obj.user.id).first().last_name
 
 
 class ProfessionSerializer(serializers.ModelSerializer):

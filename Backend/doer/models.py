@@ -3,9 +3,11 @@ from django.contrib.auth.models import User
 
 
 class Profession(models.Model):
-    title = models.CharField(max_length=256, null=True, blank=True)
+    title = models.CharField(primary_key=True, max_length=256)
     description = models.CharField(max_length=1024, null=True, blank=True)
 
+    def __str__(self):
+        return f'{self.title}'
 
 class Doer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name='Doer profile')
@@ -20,6 +22,8 @@ class Doer(models.Model):
     )
     availability = models.CharField(max_length=1, choices=AVAILABILITY_CHOICES)
 
+    def __str__(self):
+        return f'{self.user.username}'
 
 class Employer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name='Employer profile')
@@ -27,6 +31,8 @@ class Employer(models.Model):
     profile_pic = models.ImageField(null=True, blank=True, upload_to='upload/profile_pictures', verbose_name='Profile picture')
     favorite_doers = models.ManyToManyField(Doer)
 
+    def __str__(self):
+        return f'{self.user.username}'
 
 class Request(models.Model):
     title = models.CharField(max_length=1024)
@@ -47,12 +53,17 @@ class Request(models.Model):
     )
     status = models.CharField(max_length=1, choices=STATUS_CHOICES)
 
+    def __str__(self):
+        return f'{self.id}: {self.title} from {self.employer.user.username}'
 
 class RequestSubmission(models.Model):
     doer = models.ForeignKey(Doer, on_delete=models.CASCADE)
     request = models.ForeignKey(Request, on_delete=models.CASCADE, null=True, blank=True)
     offer = models.CharField(max_length=512, null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.request.id}: {self.request.title} from {self.doer.user.username}'
 
 
 class ReportRequest(models.Model):
@@ -65,6 +76,9 @@ class ReportRequest(models.Model):
     )
     report_status = models.CharField(max_length=1, choices=REPORT_STATUS_CHOICES)
 
+    def __str__(self):
+        return f'{self.request.id}: {self.request.title}'
+
 
 class ReportProfile(models.Model):
     profile = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -75,6 +89,8 @@ class ReportProfile(models.Model):
     )
     report_status = models.CharField(max_length=1, choices=REPORT_STATUS_CHOICES)
     
+    def __str__(self):
+        return f'{self.id}: {self.profile.id}'
 
 class Message(models.Model):
     sender = models.ForeignKey(User, related_name='sender', on_delete=models.CASCADE)
@@ -82,9 +98,14 @@ class Message(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     message = models.CharField(max_length=2048)
 
+    def __str__(self):
+        return f'{self.sender.user.username} to {self.receiver.user.username}: {self.message}'
+
 
 class Rating(models.Model):
     rater = models.ForeignKey(User, related_name='rater', on_delete=models.CASCADE)
     ratee = models.ForeignKey(User, related_name='ratee', on_delete=models.CASCADE)
     rate = models.IntegerField()
 
+    def __str__(self):
+        return f'{self.rater.user.username} to {self.ratee.user.username}: {self.rate}'
