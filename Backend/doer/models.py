@@ -46,7 +46,6 @@ class Request(models.Model):
     price = models.DecimalField(max_digits=100, decimal_places=3, null=True, blank=True)
     STATUS_CHOICES = (
        ('A', 'Available'),
-       ('B', 'Busy'),
        ('C', 'Closed'),
        ('D', 'Done'),
        ('P', 'In progress'),

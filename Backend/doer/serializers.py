@@ -48,7 +48,7 @@ class RequestSerializer(serializers.ModelSerializer):
         model = Request
         fields = ['title', 'description', 'professions', 'doer', 'publication_date', 'expiration_date', 'location', 'price', 'status']
 
-    def create(self, validate_data):
+    def create(self, validated_data):
         request_user = self.context['request'].user
 
         if employer := Employer.objects.filter(user=request_user).first():
