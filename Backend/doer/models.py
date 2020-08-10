@@ -100,6 +100,7 @@ class Message(models.Model):
     receiver = models.ForeignKey(User, related_name='receiver',  on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
     message = models.CharField(max_length=2048)
+    read = models.BooleanField(default=False)
 
     def __str__(self):
         return f'{self.sender.user.username} to {self.receiver.user.username}: {self.message}'

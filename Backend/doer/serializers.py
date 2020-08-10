@@ -83,13 +83,13 @@ class ReportProfileSerializer(serializers.ModelSerializer):
 class MessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
-        fields = ['receiver', 'timestamp', 'message']
+        fields = ['receiver', 'timestamp', 'message', 'read']
 
     def create(self, validated_data):
         request_user = self.context['request'].user
 
         if User.objects.filter(id=request_user.id).first():
-            return Message.objects.create(sender=request_user, **validated_date)
+            return Message.objects.create(sender=request_user, **validated_data)
 
 
 class RequestSearchSerializer(serializers.ModelSerializer):
