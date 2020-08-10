@@ -22,6 +22,10 @@ class Doer(models.Model):
     )
     availability = models.CharField(max_length=1, choices=AVAILABILITY_CHOICES)
 
+    @property
+    def username(self):
+        return self.user__username
+
     def __str__(self):
         return f'{self.user.username}'
 

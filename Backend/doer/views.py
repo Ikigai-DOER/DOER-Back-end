@@ -1,3 +1,4 @@
+from rest_framework.response import Response
 from rest_framework import viewsets
 from .serializers import *
 from .models import *
@@ -41,5 +42,13 @@ class ReportProfileViewSet(viewsets.ModelViewSet):
 class MessageViewSet(viewsets.ModelViewSet):
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
+
+
+class RequestSearchViewSet(viewsets.ViewSet):
+    def list(self, request):
+        filter_professions = request.GET.get('professions', []).split(',')
+        queryset = Request.objects.all().filter(professions__in=filter_professions)
+        serializer = RequestSearchSerializer(queryset, many=True)
+        return Response(serializer.data)
 
 

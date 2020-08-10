@@ -5,36 +5,34 @@ from django.contrib.auth.models import User
 import json
 
 
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'first_name', 'last_name', 'email', 'date_joined', 'last_login']
+
+
 class EmployerSerializer(serializers.ModelSerializer):
+    user_profile = UserSerializer(read_only=True, source='user')
+
     class Meta:
         model = Employer
-        fields = '__all__'
+        fields = ['phone_no', 'profile_pic', 'favorite_doers', 'user_profile']
 
 
 class DoerSerializer(serializers.ModelSerializer):
+    user_profile = UserSerializer(read_only=True, source='user')
+
     class Meta:
         model = Doer
-        fields = ['username', 'first_name', 'last_name', 'phone_no', 'profile_pic', 'average_mark', 'professions', 'availability', 'user_rating']
+        fields = ['user_profile', 'phone_no', 'profile_pic', 'average_mark', 'professions', 'availability', 'user_rating']
 
     user_rating = serializers.SerializerMethodField()
-    username = serializers.SerializerMethodField()
-    first_name = serializers.SerializerMethodField()
-    last_name = serializers.SerializerMethodField()
 
     def get_user_rating(self, obj):
         request_user = self.context['request'].user
 
         if request_user.is_authenticated and (rating := Rating.objects.filter(rater=request_user, ratee=obj.user).first()):
             return rating.rate
-
-    def get_username(self, obj):
-        return User.objects.filter(id=obj.user.id).first().username
-
-    def get_first_name(self, obj):
-        return User.objects.filter(id=obj.user.id).first().first_name
-
-    def get_last_name(self, obj):
-        return User.objects.filter(id=obj.user.id).first().last_name
 
 
 class ProfessionSerializer(serializers.ModelSerializer):
@@ -44,9 +42,11 @@ class ProfessionSerializer(serializers.ModelSerializer):
 
 
 class RequestSerializer(serializers.ModelSerializer):
+    employer = EmployerSerializer(read_only=True)
+
     class Meta:
         model = Request
-        fields = ['title', 'description', 'professions', 'doer', 'publication_date', 'expiration_date', 'location', 'price', 'status']
+        fields = ['title', 'employer', 'description', 'professions', 'doer', 'publication_date', 'expiration_date', 'location', 'price', 'status']
 
     def create(self, validated_data):
         request_user = self.context['request'].user
@@ -80,7 +80,7 @@ class ReportProfileSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class MessageSerializer():
+class MessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
         fields = ['receiver', 'timestamp', 'message']
@@ -92,3 +92,7 @@ class MessageSerializer():
             return Message.objects.create(sender=request_user, **validated_date)
 
 
+class RequestSearchSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Request
+        fields = '__all__'
