@@ -47,6 +47,7 @@ class MessageViewSet(viewsets.ModelViewSet):
 class RequestSearchViewSet(viewsets.ViewSet):
     def list(self, request):
         filter_professions = request.GET.get('professions', []).split(',')
+        print(filter_professions)
         queryset = Request.objects.all().filter(professions__in=filter_professions)
         serializer = RequestSearchSerializer(queryset, many=True)
         return Response(serializer.data)
