@@ -13,14 +13,15 @@ class Doer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name='Doer profile')
     phone_no = models.CharField(max_length=20, null=True, blank=True, verbose_name='Doer phone no')
     profile_pic = models.ImageField(null=True, blank=True, upload_to='upload/profile_pictures', verbose_name='Profile picture')
+    birth_date = models.DateField(null=True, blank=True)
     average_mark = models.DecimalField(max_digits=3, decimal_places=2, null=True, blank=True)
-    professions = models.ManyToManyField(Profession)
+    professions = models.ManyToManyField(Profession, blank=True)
     AVAILABILITY_CHOICES = (
        ('A', 'Available'),
        ('B', 'Busy'),
        ('U', 'Unavailable'),
     )
-    availability = models.CharField(max_length=1, choices=AVAILABILITY_CHOICES)
+    availability = models.CharField(null=True, blank=True, max_length=1, choices=AVAILABILITY_CHOICES)
 
     @property
     def username(self):
@@ -33,6 +34,7 @@ class Employer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name='Employer profile')
     phone_no = models.CharField(max_length=20, null=True, blank=True, verbose_name='Employer phone no')
     profile_pic = models.ImageField(null=True, blank=True, upload_to='upload/profile_pictures', verbose_name='Profile picture')
+    birth_date = models.DateField(null=True, blank=True)
     favorite_doers = models.ManyToManyField(Doer)
 
     def __str__(self):
@@ -91,7 +93,7 @@ class ReportProfile(models.Model):
         ('C', 'Closed'),
     )
     report_status = models.CharField(max_length=1, choices=REPORT_STATUS_CHOICES)
-    
+
     def __str__(self):
         return f'{self.id}: {self.profile.id}'
 

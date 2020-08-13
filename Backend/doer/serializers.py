@@ -8,25 +8,34 @@ import json
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username', 'first_name', 'last_name', 'email', 'date_joined', 'last_login']
+        fields = ['id', 'username', 'password', 'first_name', 'last_name', 'email', 'date_joined', 'last_login']
 
 
 class EmployerSerializer(serializers.ModelSerializer):
-    user_profile = UserSerializer(read_only=True, source='user')
+    user_profile = UserSerializer(source='user')
 
     class Meta:
         model = Employer
-        fields = ['phone_no', 'profile_pic', 'favorite_doers', 'user_profile']
+        fields = ['birth_date', 'phone_no', 'profile_pic', 'favorite_doers', 'user_profile']
 
-
+    def create(self, validated_data):
+            userProfile = validated_data.pop('user')
+            user = User.objects.create(**userProfile)
+            return Employer.objects.create(user=user, **validated_data)
+            
+            
 class DoerSerializer(serializers.ModelSerializer):
-    user_profile = UserSerializer(read_only=True, source='user')
-
+    user_profile = UserSerializer(source='user')
+    user_rating = serializers.SerializerMethodField()
+    
     class Meta:
         model = Doer
-        fields = ['user_profile', 'phone_no', 'profile_pic', 'average_mark', 'professions', 'availability', 'user_rating']
-
-    user_rating = serializers.SerializerMethodField()
+        fields = ['user_profile', 'birth_date', 'phone_no', 'profile_pic', 'average_mark', 'professions', 'availability', 'user_rating']
+        
+    def create(self, validated_data):
+        userProfile = validated_data.pop('user')
+        user = User.objects.create(**userProfile)
+        return Doer.objects.create(user=user, **validated_data)
 
     def get_user_rating(self, obj):
         request_user = self.context['request'].user
