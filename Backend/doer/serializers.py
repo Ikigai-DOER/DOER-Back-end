@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from dj_rest_auth.registration.serializers import RegisterSerializer
 from .models import *
 from pprint import pprint
 from django.contrib.auth.models import User
@@ -8,7 +9,7 @@ import json
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'password', 'first_name', 'last_name', 'email', 'date_joined', 'last_login']
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'date_joined', 'last_login']
 
 
 class EmployerSerializer(serializers.ModelSerializer):
@@ -18,10 +19,10 @@ class EmployerSerializer(serializers.ModelSerializer):
         model = Employer
         fields = ['birth_date', 'phone_no', 'profile_pic', 'favorite_doers', 'user_profile']
 
-    def create(self, validated_data):
-            userProfile = validated_data.pop('user')
-            user = User.objects.create(**userProfile)
-            return Employer.objects.create(user=user, **validated_data)
+#    def create(self, validated_data):
+#            userProfile = validated_data.pop('user')
+#            user = User.objects.create(**userProfile)
+#            return Employer.objects.create(user=user, **validated_data)
             
             
 class DoerSerializer(serializers.ModelSerializer):
@@ -32,10 +33,10 @@ class DoerSerializer(serializers.ModelSerializer):
         model = Doer
         fields = ['user_profile', 'birth_date', 'phone_no', 'profile_pic', 'average_mark', 'professions', 'availability', 'user_rating']
         
-    def create(self, validated_data):
-        userProfile = validated_data.pop('user')
-        user = User.objects.create(**userProfile)
-        return Doer.objects.create(user=user, **validated_data)
+#    def create(self, validated_data):
+#        userProfile = validated_data.pop('user')
+#        user = User.objects.create(**userProfile)
+#        return Doer.objects.create(user=user, **validated_data)
 
     def get_user_rating(self, obj):
         request_user = self.context['request'].user
@@ -108,3 +109,32 @@ class RequestSearchSerializer(serializers.ModelSerializer):
     class Meta:
         model = Request
         fields = '__all__'
+
+
+
+class CustomRegisterSerializer(RegisterSerializer):
+    first_name = serializers.CharField()
+    last_name = serializers.CharField()
+
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'first_name','last_name',
+        'password1', 'password2',]
+        extra_kwargs = {
+            'password': {
+                'write_only':True
+            }
+        }
+
+    def get_cleaned_data(self):
+        super(CustomRegisterSerializer, self).get_cleaned_data()
+
+        return {
+            'username': self.validated_data.get('username', ''),
+            'first_name': self.validated_data.get('first_name', ''),
+            'last_name': self.validated_data.get('last_name', ''),
+            'password1': self.validated_data.get('password1', ''),
+            'password2': self.validated_data.get('password2', ''),
+            'email': self.validated_data.get('email', ''),
+        }
+
