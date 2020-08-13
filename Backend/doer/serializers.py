@@ -55,13 +55,16 @@ class RequestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Request
-        fields = ['title', 'employer', 'description', 'professions', 'doer', 'publication_date', 'expiration_date', 'location', 'price', 'status']
+        fields = ['id', 'title', 'employer', 'description', 'professions', 'doer', 'publication_date', 'expiration_date', 'location', 'price', 'status']
 
     def create(self, validated_data):
         request_user = self.context['request'].user
 
         if employer := Employer.objects.filter(user=request_user).first():
-            return Request.objects.create(employer=employer, **validated_data)
+            professions = validated_data.pop('professions')
+            request = Request.objects.create(employer=employer, **validated_data)
+            request.professions.add(*professions)
+            return request
 
 
 class RequestSubmissionSerializer(serializers.ModelSerializer):
