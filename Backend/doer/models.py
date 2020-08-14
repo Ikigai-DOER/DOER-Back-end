@@ -115,4 +115,4 @@ class Rating(models.Model):
     rate = models.IntegerField()
 
     def __str__(self):
-        return f'{self.rater.user.username} to {self.ratee.user.username}: {self.rate}'
+        return f'{self.rater.username} to {self.ratee.username}: {self.rate}'
