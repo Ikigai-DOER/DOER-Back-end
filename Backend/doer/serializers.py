@@ -23,6 +23,22 @@ class EmployerSerializer(serializers.ModelSerializer):
 #            userProfile = validated_data.pop('user')
 #            user = User.objects.create(**userProfile)
 #            return Employer.objects.create(user=user, **validated_data)
+
+    def update(self, instance, validated_data):
+        req_user = self.context['request'].user
+
+        if not req_user.is_authenticated() or req_user != Employer.objects.filter(user=req_user).first():
+            pass
+
+        instance.user_profile.username = validated_data.get('username', instance.user_profile.username)
+        instance.user_profile.first_name = validated_data.get('first_name', instance.user_profile.first_name)
+        instance.user_profile.last_name = validated_data.get('last_name', instance.user_profile.first_name)
+        instance.user_profile.email = validated_data.get('email', instance.user_profile.first_name)
+        instance.phone_no = validated_data.get('phone_no', instance.phone_no)
+        instance.profile_pic = validated_data.get('profile_pic', instance.profile_pic)
+        instance.favorite_doers = validated_data.get('favorite_doers', instance.favorite_doers)
+        instance.birth_date = validated_data.get('birth_date', instance.birth_date)
+
             
             
 class DoerSerializer(serializers.ModelSerializer):
@@ -43,6 +59,25 @@ class DoerSerializer(serializers.ModelSerializer):
 
         if request_user.is_authenticated and (rating := Rating.objects.filter(rater=request_user, ratee=obj.user).first()):
             return rating.rate
+
+    def update(self, instance, validated_data):
+        req_user = self.context['request'].user
+
+        if not req_user.is_authenticated() or req_user != Doer.objects.filter(user=req_user).first():
+            pass
+
+        instance.user_profile.username = validated_data.get('username', instance.user_profile.username)
+        instance.user_profile.first_name = validated_data.get('first_name', instance.user_profile.first_name)
+        instance.user_profile.last_name = validated_data.get('last_name', instance.user_profile.first_name)
+        instance.user_profile.email = validated_data.get('email', instance.user_profile.first_name)
+        instance.phone_no = validated_data.get('phone_no', instance.phone_no)
+        instance.profile_pic = validated_data.get('profile_pic', instance.profile_pic)
+        instance.favorite_doers = validated_data.get('favorite_doers', instance.favorite_doers)
+        instance.birth_date = validated_data.get('birth_date', instance.birth_date)
+        instance.average_mark = (instance.average_mark + validated_data.get('average_mark', instance.average_mark)) / 2
+        instance.professions = validated_data.get('professions', instance.professions)
+        instance.availability = validated_data.get('availability', instance.availability)
+        instance.user_rating = validated_data.get('user_rating', instance.user_rating)
 
 
 class ProfessionSerializer(serializers.ModelSerializer):
