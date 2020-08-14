@@ -20,7 +20,7 @@ def RateDoerView(request):
 
     if doer := Doer.objects.filter(id=ratee):
         doer = doer.first()
-        doer.average_mark = (doer.average_mark + rate) / 2
+        doer.average_mark = (doer.average_mark + int(rate)) / 2
         doer.save()
         Rating.objects.create(rater=request.user, ratee=doer.user, rate=rate).save()
 
