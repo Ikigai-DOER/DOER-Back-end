@@ -16,13 +16,16 @@ def RateDoerView(request):
     ratee = request.GET.get('ratee', None)
 
     if rate is None or ratee is None:
-        pass
+        return HttpResponse(status=400)
 
     if doer := Doer.objects.filter(id=ratee):
         doer = doer.first()
         doer.average_mark = (doer.average_mark + int(rate)) / 2
         doer.save()
         Rating.objects.create(rater=request.user, ratee=doer.user, rate=rate).save()
+        return HttpResponse(status=200)
+
+    return HttpResponse(status=400)
 
 
 class EmployerViewSet(viewsets.ModelViewSet):
