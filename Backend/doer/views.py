@@ -4,8 +4,10 @@ from django.contrib.auth.decorators import login_required
 from rest_framework import viewsets
 from .serializers import *
 from .models import *
+from django.views.decorators.http import require_POST
 
 
+@require_POST
 @login_required
 def RateDoerView(request):
     rate = request.GET.get('rate', None)
