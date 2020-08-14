@@ -35,9 +35,9 @@ class PersonalRequestsViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         if doer := Doer.objects.filter(user=self.request.user):
-            return Request.objects.filter(doer=doer)
+            return Request.objects.filter(doer=doer.first())
         elif employer := Employer.objects.filter(user=self.request.user):
-            return Request.objects.filter(employer=employer)
+            return Request.objects.filter(employer=employer.first())
 
 
 class RequestSubmissionViewSet(viewsets.ModelViewSet):
