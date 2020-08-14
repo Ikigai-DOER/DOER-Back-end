@@ -14,10 +14,10 @@ router.register('report-request', ReportRequestViewSet)
 router.register('report-profile', ReportProfileViewSet)
 router.register('request-submission', RequestSubmissionViewSet)
 router.register('personal-requests', PersonalRequestsViewSet, basename='personal-requests'),
-router.register('rate-doer', RateDoerView),
 router.register('request-search', RequestSearchViewSet, basename='request-search')
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('rate-doer', RateDoerView)
 ]
 
