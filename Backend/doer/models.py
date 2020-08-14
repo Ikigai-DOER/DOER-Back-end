@@ -15,6 +15,7 @@ class Doer(models.Model):
     profile_pic = models.ImageField(null=True, blank=True, upload_to='upload/profile_pictures', verbose_name='Profile picture')
     birth_date = models.DateField(null=True, blank=True)
     average_mark = models.DecimalField(max_digits=3, decimal_places=2, null=True, blank=True)
+    number_rates = models.IntegerField(null=True, blank=True, default=0)
     professions = models.ManyToManyField(Profession, blank=True)
     AVAILABILITY_CHOICES = (
        ('A', 'Available'),

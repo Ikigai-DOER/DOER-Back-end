@@ -13,7 +13,7 @@ from django.http import HttpResponse
 @csrf_exempt
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-class RateDoerView(request):
+def RateDoerView(request):
     rate = request.GET.get('rate', None)
     ratee = request.GET.get('ratee', None)
 
@@ -22,9 +22,22 @@ class RateDoerView(request):
 
     if doer := Doer.objects.filter(id=ratee):
         doer = doer.first()
-        doer.average_mark = (doer.average_mark + int(rate)) / 2
+        if rating_obj := Rating.objects.filter(rater=request.rater, ratee=doer.user):
+            rating_obj.rate = rate
+            try:
+                doer.average_mark = doer.average_mark * doer.number_rates - (doer.average_mark - float(rate))
+            except TypeError:
+                return HttpResponse(status=400)
+        else:
+            Rating.objects.create(rater=request.user, ratee=doer.user, rate=rate).save()
+            doer.number_rates += 1
+            try:
+                doer.average_mark = (doer.average_mark + float(rate)) / doer.number_rates
+            except TypeError:
+                return HttpResponse(status=400)
+
+        rating_obj.save()
         doer.save()
-        Rating.objects.create(rater=request.user, ratee=doer.user, rate=rate).save()
         return HttpResponse(status=200)
 
     return HttpResponse(status=400)
