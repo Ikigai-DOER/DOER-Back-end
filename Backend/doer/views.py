@@ -2,6 +2,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.decorators import login_required
 from rest_framework import viewsets
+from rest_framework.decorators import api_view, permission_classes
 from .serializers import *
 from .models import *
 from django.views.decorators.http import require_POST
@@ -10,9 +11,9 @@ from django.http import HttpResponse
 
 
 @csrf_exempt
-@require_POST
-@login_required
-def RateDoerView(request):
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+class RateDoerView(request):
     rate = request.GET.get('rate', None)
     ratee = request.GET.get('ratee', None)
 
