@@ -114,6 +114,7 @@ class RequestSearchSerializer(serializers.ModelSerializer):
 class PersonalRequestsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Request
+        fields = '__all__'
 
 
 
