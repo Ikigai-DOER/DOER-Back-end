@@ -22,19 +22,18 @@ def RateDoerView(request):
 
     if doer := Doer.objects.filter(id=ratee):
         doer = doer.first()
-        if rating_obj := Rating.objects.filter(rater=request.rater, ratee=doer.user):
+        if rating_obj := Rating.objects.filter(rater=request.user, ratee=doer.user):
             rating_obj.rate = rate
-            try:
-                doer.average_mark = doer.average_mark * doer.number_rates - (doer.average_mark - float(rate))
-            except TypeError:
-                return HttpResponse(status=400)
+            doer.average_mark = float(doer.average_mark)* doer.number_rates - (float(doer.average_mark) - float(rate))
+            #except TypeError:
+             #   return HttpResponse(status=400)
         else:
-            Rating.objects.create(rater=request.user, ratee=doer.user, rate=rate).save()
+            rating_obj = Rating.objects.create(rater=request.user, ratee=doer.user, rate=rate)
             doer.number_rates += 1
-            try:
-                doer.average_mark = (doer.average_mark + float(rate)) / doer.number_rates
-            except TypeError:
-                return HttpResponse(status=400)
+ #           try:
+            doer.average_mark = ((float(doer.average_mark) or 0) + float(rate)) / float(doer.number_rates)
+            #except TypeError:
+             #   return HttpResponse(status=400)
 
         rating_obj.save()
         doer.save()
