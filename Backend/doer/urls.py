@@ -13,6 +13,7 @@ router.register(r'profession', ProfessionViewSet)
 router.register(r'report-request', ReportRequestViewSet)
 router.register(r'report-profile', ReportProfileViewSet)
 router.register(r'request-submission', RequestSubmissionViewSet)
+router.register(r'personal-requests', PersonalRequestsViewSet, basename='personal-requests')
 router.register(r'request-search', RequestSearchViewSet, basename='request-search')
 
 urlpatterns = [

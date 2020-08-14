@@ -32,8 +32,8 @@ class DoerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Doer
         fields = ['user_profile', 'birth_date', 'phone_no', 'profile_pic', 'average_mark', 'professions', 'availability', 'user_rating']
-        
-#    def create(self, validated_data):
+       
+#   def create(self, validated_data):
 #        userProfile = validated_data.pop('user')
 #        user = User.objects.create(**userProfile)
 #        return Doer.objects.create(user=user, **validated_data)
@@ -109,6 +109,11 @@ class RequestSearchSerializer(serializers.ModelSerializer):
     class Meta:
         model = Request
         fields = '__all__'
+
+        
+class PersonalRequestsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Request
 
 
 

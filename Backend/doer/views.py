@@ -25,13 +25,24 @@ class ProfessionViewSet(viewsets.ModelViewSet):
 
 class RequestViewSet(viewsets.ModelViewSet):
     queryset = Request.objects.all()
-    #permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     serializer_class = RequestSerializer
+
+
+class PersonalRequestsViewSet(viewsets.ReadOnlyModelViewSet):
+    permission_classes = [IsAuthenticated]
+    serializer_class = PersonalRequestsSerializer
+
+    def get_queryset(self):
+        if doer := Doer.objects.filter(user=self.request.user):
+            return Request.objects.filter(doer=doer)
+        elif employer := Employer.objects.filter(user=self.request.user):
+            return Request.objects.filter(employer=employer)
 
 
 class RequestSubmissionViewSet(viewsets.ModelViewSet):
     queryset = RequestSubmission.objects.all()
-    #permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     serializer_class = RequestSubmissionSerializer
 
 
@@ -62,5 +73,4 @@ class RequestSearchViewSet(viewsets.ViewSet):
         queryset = Request.objects.all().filter(professions__in=filter_professions)
         serializer = RequestSearchSerializer(queryset, many=True)
         return Response(serializer.data)
-
 
