@@ -5,8 +5,10 @@ from rest_framework import viewsets
 from .serializers import *
 from .models import *
 from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
 
 
+@csrf_exempt
 @require_POST
 @login_required
 def RateDoerView(request):
