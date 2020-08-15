@@ -36,7 +36,7 @@ class Employer(models.Model):
     phone_no = models.CharField(max_length=20, null=True, blank=True, verbose_name='Employer phone no')
     profile_pic = models.ImageField(null=True, blank=True, upload_to='upload/profile_pictures', verbose_name='Profile picture')
     birth_date = models.DateField(null=True, blank=True)
-    favorite_doers = models.ManyToManyField(Doer)
+    favorite_doers = models.ManyToManyField(Doer, blank=True)
 
     def __str__(self):
         return f'{self.user.username}'

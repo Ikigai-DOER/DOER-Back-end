@@ -3,6 +3,7 @@ from dj_rest_auth.registration.serializers import RegisterSerializer
 from .models import *
 from pprint import pprint
 from django.contrib.auth.models import User
+from django.db import IntegrityError
 import json
 
 
@@ -13,16 +14,25 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class EmployerSerializer(serializers.ModelSerializer):
-    user_profile = UserSerializer(source='user')
+    user_profile = UserSerializer(read_only=True, source='user')
+    user_id = serializers.IntegerField()
 
     class Meta:
         model = Employer
-        fields = ['birth_date', 'phone_no', 'profile_pic', 'favorite_doers', 'user_profile']
+        fields = ['birth_date', 'user_id', 'phone_no', 'profile_pic', 'favorite_doers', 'user_profile']
 
-#    def create(self, validated_data):
-#            userProfile = validated_data.pop('user')
-#            user = User.objects.create(**userProfile)
-#            return Employer.objects.create(user=user, **validated_data)
+    def create(self, validated_data):
+        user_id = validated_data.pop('user_id')
+        user = User.objects.filter(id=user_id).first()
+        return Employer.objects.create(user=user, **validated_data)
+
+    def validate_user_id(self, value):
+        if Employer.objects.filter(user_id=value) or Doer.objects.filter(user_id=value):
+            raise serializers.ValidationError('User is already taken.')
+        elif not isinstance(value, int) or not User.objects.filter(id=value):
+            raise serializers.ValidationError("Invalid user's id.")
+        else:
+            return value
 
     def update(self, instance, validated_data):
         req_user = self.context['request'].user
@@ -42,17 +52,26 @@ class EmployerSerializer(serializers.ModelSerializer):
             
             
 class DoerSerializer(serializers.ModelSerializer):
-    user_profile = UserSerializer(source='user')
+    user_profile = UserSerializer(read_only=True, source='user')
     user_rating = serializers.SerializerMethodField()
+    user_id = serializers.IntegerField()
     
     class Meta:
         model = Doer
-        fields = ['user_profile', 'birth_date', 'phone_no', 'profile_pic', 'average_mark', 'professions', 'availability', 'user_rating']
+        fields = ['user_profile', 'user_id', 'birth_date', 'phone_no', 'profile_pic', 'average_mark', 'professions', 'availability', 'user_rating']
        
-#   def create(self, validated_data):
-#        userProfile = validated_data.pop('user')
-#        user = User.objects.create(**userProfile)
-#        return Doer.objects.create(user=user, **validated_data)
+    def create(self, validated_data):
+        user_id = validated_data.pop('user_id')
+        user = User.objects.filter(id=user_id).first()
+        return Doer.objects.create(user=user, **validated_data)
+
+    def validate_user_id(self, value):
+        if Employer.objects.filter(user_id=value) or Doer.objects.filter(user_id=value):
+            raise serializers.ValidationError('User is already taken.')
+        elif not isinstance(value, int) or not User.objects.filter(id=value):
+            raise serializers.ValidationError("Invalid user's id.")
+        else:
+            return value
 
     def get_user_rating(self, obj):
         request_user = self.context['request'].user
