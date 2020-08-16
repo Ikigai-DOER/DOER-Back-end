@@ -19,7 +19,7 @@ class EmployerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Employer
-        fields = ['birth_date', 'user_id', 'phone_no', 'profile_pic', 'favorite_doers', 'user_profile']
+        fields = ['id', 'birth_date', 'user_id', 'phone_no', 'profile_pic', 'favorite_doers', 'user_profile']
 
     def create(self, validated_data):
         user_id = validated_data.pop('user_id')
