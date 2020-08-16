@@ -58,7 +58,7 @@ class DoerSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Doer
-        fields = ['user_profile', 'user_id', 'birth_date', 'phone_no', 'profile_pic', 'average_mark', 'professions', 'availability', 'user_rating']
+        fields = ['id', 'user_profile', 'user_id', 'birth_date', 'phone_no', 'profile_pic', 'average_mark', 'professions', 'availability', 'user_rating']
        
     def create(self, validated_data):
         user_id = validated_data.pop('user_id')
