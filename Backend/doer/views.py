@@ -1,14 +1,33 @@
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.decorators import login_required
-from rest_framework import viewsets
-from rest_framework.decorators import api_view, permission_classes
-from .serializers import *
-from .models import *
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework.decorators import api_view, permission_classes
 from django.http import HttpResponse
+from rest_framework import viewsets
+from django.core import serializers as core_serializers
+from django.http import JsonResponse
+from .serializers import *
+from .models import *
 
+
+@csrf_exempt
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def UserInfoView(request):
+    user_id = request.GET.get('userId', None)
+    
+    if not user_id:
+        return HttpResponse(status=400)
+
+    if doer := Doer.objects.filter(user_id=user_id):
+        return JsonResponse({'user': DoerSerializer(doer.first()).data, 'doer': True})
+
+    if employer := Employer.objects.filter(user_id=user_id):
+        return JsonResponse({'user': EmployerSerializer(employer.first()).data, 'doer': False})
+
+    return HttpResponse(status=404)
 
 @csrf_exempt
 @api_view(['POST'])
@@ -25,15 +44,11 @@ def RateDoerView(request):
         if rating_obj := Rating.objects.filter(rater=request.user, ratee=doer.user):
             rating_obj.rate = rate
             doer.average_mark = float(doer.average_mark)* doer.number_rates - (float(doer.average_mark) - float(rate))
-            #except TypeError:
-             #   return HttpResponse(status=400)
         else:
             rating_obj = Rating.objects.create(rater=request.user, ratee=doer.user, rate=rate)
             doer.number_rates += 1
  #           try:
             doer.average_mark = ((float(doer.average_mark) or 0) + float(rate)) / float(doer.number_rates)
-            #except TypeError:
-             #   return HttpResponse(status=400)
 
         rating_obj.save()
         doer.save()

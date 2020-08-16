@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from dj_rest_auth.registration.serializers import RegisterSerializer
+from dj_rest_auth.registration.serializers import RegisterSerializer 
+from dj_rest_auth.serializers import LoginSerializer
 from .models import *
 from pprint import pprint
 from django.contrib.auth.models import User
@@ -74,7 +75,10 @@ class DoerSerializer(serializers.ModelSerializer):
             return value
 
     def get_user_rating(self, obj):
-        request_user = self.context['request'].user
+        if request_user := self.context.get('request', None):
+            request_user = self.context['request'].user
+        else:
+            return
 
         if request_user.is_authenticated and (rating := Rating.objects.filter(rater=request_user, ratee=obj.user).first()):
             return rating.rate
