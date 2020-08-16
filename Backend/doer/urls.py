@@ -18,6 +18,7 @@ router.register('request-search', RequestSearchViewSet, basename='request-search
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('rate-doer/', RateDoerView)
+    path('rate-doer/', RateDoerView),
+    path('user-info/', UserInfoView)
 ]
 

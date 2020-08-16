@@ -132,7 +132,7 @@ SIMPLE_JWT = {
 }
 
 REST_AUTH_REGISTER_SERIALIZERS = {
-    'REGISTER_SERIALIZER': 'doer.serializers.CustomRegisterSerializer'
+    'REGISTER_SERIALIZER': 'doer.serializers.CustomRegisterSerializer',
 }
 
 REST_USE_JWT = True
