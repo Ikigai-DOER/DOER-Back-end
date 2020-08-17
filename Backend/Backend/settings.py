@@ -167,7 +167,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 # Media URL
-MEDIA_URL = '/image/'
+MEDIA_URL = '/profile-pics/'
 
 # Media root
 MEDIA_ROOT = os.path.join(os.getcwd(), '/upload/profile_pictures/')

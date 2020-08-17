@@ -10,6 +10,22 @@ from django.core import serializers as core_serializers
 from django.http import JsonResponse
 from .serializers import *
 from .models import *
+from django.conf import settings
+import magic
+
+
+@csrf_exempt
+@api_view(['GET'])
+def ProfilePicturesView(request, picture_name):
+    print(request)
+    try:
+        path_to_pic = os.path.join(settings.MEDIA_ROOT, picture_name)
+        print(path_to_pic)
+        with open(path_to_pic, "rb") as f:
+            mime_type = magic.from_file(path_to_pic, mime=True)
+            return HttpResponse(f.read(), content_type=mime_type)
+    except IOError:
+        return HttpResponse(status=404)
 
 
 @csrf_exempt
@@ -43,7 +59,7 @@ def RateDoerView(request):
         doer = doer.first()
         if rating_obj := Rating.objects.filter(rater=request.user, ratee=doer.user):
             rating_obj.rate = rate
-            doer.average_mark = float(doer.average_mark)* doer.number_rates - (float(doer.average_mark) - float(rate))
+            doer.average_mark = float(doer.average_mark) * doer.number_rates - (float(doer.average_mark) - float(rate))
         else:
             rating_obj = Rating.objects.create(rater=request.user, ratee=doer.user, rate=rate)
             doer.number_rates += 1

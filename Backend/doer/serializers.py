@@ -16,12 +16,11 @@ class UserSerializer(serializers.ModelSerializer):
 
 class EmployerSerializer(serializers.ModelSerializer):
     user_profile = UserSerializer(read_only=True, source='user')
-    user_id = serializers.IntegerField()
+    user_id = serializers.IntegerField(write_only=True)
 
     class Meta:
         model = Employer
         fields = ['id', 'user_id',  'birth_date', 'phone_no', 'profile_pic', 'favorite_doers', 'user_profile']
-        extra_kwargs = {'user_id': {'write_only': True}}
 
     def create(self, validated_data):
         user_id = validated_data.pop('user_id')
@@ -39,18 +38,19 @@ class EmployerSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         req_user = self.context['request'].user
 
-        if not req_user.is_authenticated() or req_user != Employer.objects.filter(user=req_user).first():
+        if not req_user.is_authenticated or req_user != Employer.objects.filter(user=req_user).first():
             pass
 
-        instance.user_profile.username = validated_data.get('username', instance.user_profile.username)
-        instance.user_profile.first_name = validated_data.get('first_name', instance.user_profile.first_name)
-        instance.user_profile.last_name = validated_data.get('last_name', instance.user_profile.first_name)
-        instance.user_profile.email = validated_data.get('email', instance.user_profile.first_name)
+        instance.user.username = validated_data.get('username', instance.user.username)
+        instance.user.first_name = validated_data.get('first_name', instance.user.first_name)
+        instance.user.last_name = validated_data.get('last_name', instance.user.first_name)
+        instance.user.email = validated_data.get('email', instance.user.first_name)
         instance.phone_no = validated_data.get('phone_no', instance.phone_no)
         instance.profile_pic = validated_data.get('profile_pic', instance.profile_pic)
-        instance.favorite_doers = validated_data.get('favorite_doers', instance.favorite_doers)
+        instance.favorite_doers.set(validated_data.get('favorite_doers', instance.favorite_doers.all()))
         instance.birth_date = validated_data.get('birth_date', instance.birth_date)
-
+        
+        return instance
 
 
 class DoerSerializer(serializers.ModelSerializer):
@@ -62,7 +62,7 @@ class DoerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Doer
         fields = ['id', 'user_id',  'user_profile', 'birth_date', 'phone_no', 'profile_pic', 'average_mark', 'professions', 'availability', 'user_rating']
-        extra_kwargs = {'user_id': {'write_only': True}}
+        read_only_fields = ('average_mark', 'user_rating')
         
     def create(self, validated_data):
         user_id = validated_data.pop('user_id')
@@ -99,11 +99,8 @@ class DoerSerializer(serializers.ModelSerializer):
         instance.phone_no = validated_data.get('phone_no', instance.phone_no)
         instance.profile_pic = validated_data.get('profile_pic', instance.profile_pic)
         instance.birth_date = validated_data.get('birth_date', instance.birth_date)
-        # TODO: Fix average algorithm omg
-#        instance.average_mark = (instance.average_mark + validated_data.get('average_mark', instance.average_mark)) / 2
-        instance.professions.set(validated_data.get('professions', instance.professions))
         instance.availability = validated_data.get('availability', instance.availability)
-#       instance.user_rating = validated_data.get('user_rating', instance.user_rating)
+
         return instance
 
 
