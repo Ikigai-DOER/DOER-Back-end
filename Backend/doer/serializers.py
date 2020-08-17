@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from dj_rest_auth.registration.serializers import RegisterSerializer 
+from dj_rest_auth.registration.serializers import RegisterSerializer
 from dj_rest_auth.serializers import LoginSerializer
 from .models import *
 from pprint import pprint
@@ -20,7 +20,8 @@ class EmployerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Employer
-        fields = ['id', 'birth_date', 'user_id', 'phone_no', 'profile_pic', 'favorite_doers', 'user_profile']
+        fields = ['id', 'birth_date', 'phone_no', 'profile_pic', 'favorite_doers', 'user_profile']
+        extra_kwargs = {'user_id': {'write_only': True}}
 
     def create(self, validated_data):
         user_id = validated_data.pop('user_id')
@@ -50,26 +51,28 @@ class EmployerSerializer(serializers.ModelSerializer):
         instance.favorite_doers = validated_data.get('favorite_doers', instance.favorite_doers)
         instance.birth_date = validated_data.get('birth_date', instance.birth_date)
 
-            
-            
+
+
 class DoerSerializer(serializers.ModelSerializer):
     user_profile = UserSerializer(read_only=True, source='user')
     user_rating = serializers.SerializerMethodField()
-    user_id = serializers.IntegerField()
-    
+    user_id = serializers.IntegerField(write_only=True)
+
+    #TODO: FIX WRITE ONLY USER_ID IN EMPLOYER AND HERE TOO
     class Meta:
         model = Doer
-        fields = ['id', 'user_profile', 'user_id', 'birth_date', 'phone_no', 'profile_pic', 'average_mark', 'professions', 'availability', 'user_rating']
-       
+        fields = ['id', 'user_profile', 'birth_date', 'phone_no', 'profile_pic', 'average_mark', 'professions', 'availability', 'user_rating']
+        extra_kwargs = {'user_id': {'write_only': True}}
+        
     def create(self, validated_data):
         user_id = validated_data.pop('user_id')
         user = User.objects.filter(id=user_id).first()
         return Doer.objects.create(user=user, **validated_data)
 
     def validate_user_id(self, value):
-        if Employer.objects.filter(user_id=value) or Doer.objects.filter(user_id=value):
-            raise serializers.ValidationError('User is already taken.')
-        elif not isinstance(value, int) or not User.objects.filter(id=value):
+ #       if Employer.objects.filter(user_id=value) or Doer.objects.filter(user_id=value):
+  #          raise serializers.ValidationError('User is already taken.')
+        if not isinstance(value, int) or not User.objects.filter(id=value):
             raise serializers.ValidationError("Invalid user's id.")
         else:
             return value
@@ -86,21 +89,22 @@ class DoerSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         req_user = self.context['request'].user
 
-        if not req_user.is_authenticated() or req_user != Doer.objects.filter(user=req_user).first():
+        if not req_user.is_authenticated or req_user != Doer.objects.filter(user=req_user).first():
             pass
 
-        instance.user_profile.username = validated_data.get('username', instance.user_profile.username)
-        instance.user_profile.first_name = validated_data.get('first_name', instance.user_profile.first_name)
-        instance.user_profile.last_name = validated_data.get('last_name', instance.user_profile.first_name)
-        instance.user_profile.email = validated_data.get('email', instance.user_profile.first_name)
+        instance.user.username = validated_data.get('username', instance.user.username)
+        instance.user.first_name = validated_data.get('first_name', instance.user.first_name)
+        instance.user.last_name = validated_data.get('last_name', instance.user.first_name)
+        instance.user.email = validated_data.get('email', instance.user.first_name)
         instance.phone_no = validated_data.get('phone_no', instance.phone_no)
         instance.profile_pic = validated_data.get('profile_pic', instance.profile_pic)
-        instance.favorite_doers = validated_data.get('favorite_doers', instance.favorite_doers)
         instance.birth_date = validated_data.get('birth_date', instance.birth_date)
-        instance.average_mark = (instance.average_mark + validated_data.get('average_mark', instance.average_mark)) / 2
-        instance.professions = validated_data.get('professions', instance.professions)
+        # TODO: Fix average algorithm omg
+#        instance.average_mark = (instance.average_mark + validated_data.get('average_mark', instance.average_mark)) / 2
+        instance.professions.set(validated_data.get('professions', instance.professions))
         instance.availability = validated_data.get('availability', instance.availability)
-        instance.user_rating = validated_data.get('user_rating', instance.user_rating)
+#       instance.user_rating = validated_data.get('user_rating', instance.user_rating)
+        return instance
 
 
 class ProfessionSerializer(serializers.ModelSerializer):
@@ -168,7 +172,7 @@ class RequestSearchSerializer(serializers.ModelSerializer):
         model = Request
         fields = '__all__'
 
-        
+
 class PersonalRequestsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Request
