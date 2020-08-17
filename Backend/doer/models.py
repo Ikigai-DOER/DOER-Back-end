@@ -12,7 +12,7 @@ class Profession(models.Model):
 class Doer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name='Doer profile')
     phone_no = models.CharField(max_length=20, null=True, blank=True, verbose_name='Doer phone no')
-    profile_pic = models.ImageField(null=True, blank=True, upload_to='../upload/profile_pictures/', verbose_name='Profile picture')
+    profile_pic = models.ImageField(null=True, blank=True, verbose_name='Profile picture')
     birth_date = models.DateField(null=True, blank=True)
     average_mark = models.DecimalField(max_digits=3, decimal_places=2, null=True, blank=True)
     number_rates = models.IntegerField(null=True, blank=True, default=0)
@@ -34,7 +34,7 @@ class Doer(models.Model):
 class Employer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name='Employer profile')
     phone_no = models.CharField(max_length=20, null=True, blank=True, verbose_name='Employer phone no')
-    profile_pic = models.ImageField(null=True, blank=True, upload_to='../upload/profile_pictures/', verbose_name='Profile picture')
+    profile_pic = models.ImageField(null=True, blank=True, verbose_name='Profile picture')
     birth_date = models.DateField(null=True, blank=True)
     favorite_doers = models.ManyToManyField(Doer, blank=True)
 

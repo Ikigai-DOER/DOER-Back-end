@@ -1,4 +1,5 @@
 from rest_framework import routers
+from django.conf.urls import url
 from django.urls import path, include
 from .views import *
 
@@ -20,7 +21,7 @@ urlpatterns = [
     path('', include(router.urls)),
     path('rate-doer/', RateDoerView),
     path('user-info/', UserInfoView),
-    path('profile-pictures/<slug:picture_name>', ProfilePicturesView)
+    url(r'^profile-pictures/(?P<picture_name>[\w.]{0,256})$', ProfilePicturesView)
 ]
 
 

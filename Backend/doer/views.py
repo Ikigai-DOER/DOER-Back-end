@@ -11,21 +11,22 @@ from django.http import JsonResponse
 from .serializers import *
 from .models import *
 from django.conf import settings
+import os
 import magic
 
 
 @csrf_exempt
 @api_view(['GET'])
 def ProfilePicturesView(request, picture_name):
-    print(request)
     try:
+        print(settings.MEDIA_ROOT)
         path_to_pic = os.path.join(settings.MEDIA_ROOT, picture_name)
         print(path_to_pic)
         with open(path_to_pic, "rb") as f:
             mime_type = magic.from_file(path_to_pic, mime=True)
             return HttpResponse(f.read(), content_type=mime_type)
     except IOError:
-        return HttpResponse(status=404)
+        return HttpResponse(status=303)
 
 
 @csrf_exempt
