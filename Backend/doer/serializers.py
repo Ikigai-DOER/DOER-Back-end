@@ -20,7 +20,7 @@ class EmployerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Employer
-        fields = ['id', 'birth_date', 'phone_no', 'profile_pic', 'favorite_doers', 'user_profile']
+        fields = ['id', 'user_id',  'birth_date', 'phone_no', 'profile_pic', 'favorite_doers', 'user_profile']
         extra_kwargs = {'user_id': {'write_only': True}}
 
     def create(self, validated_data):
@@ -61,7 +61,7 @@ class DoerSerializer(serializers.ModelSerializer):
     #TODO: FIX WRITE ONLY USER_ID IN EMPLOYER AND HERE TOO
     class Meta:
         model = Doer
-        fields = ['id', 'user_profile', 'birth_date', 'phone_no', 'profile_pic', 'average_mark', 'professions', 'availability', 'user_rating']
+        fields = ['id', 'user_id',  'user_profile', 'birth_date', 'phone_no', 'profile_pic', 'average_mark', 'professions', 'availability', 'user_rating']
         extra_kwargs = {'user_id': {'write_only': True}}
         
     def create(self, validated_data):
