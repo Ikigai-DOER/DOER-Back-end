@@ -58,6 +58,7 @@ class EmployerSerializer(serializers.ModelSerializer):
 
 
 class DoerSerializer(serializers.ModelSerializer):
+    # USER PROFILE REQUIRED ON UPDATE
     user_profile = UserSerializer(source='user')
     user_rating = serializers.SerializerMethodField()
     user_id = serializers.IntegerField(write_only=True)
@@ -96,11 +97,11 @@ class DoerSerializer(serializers.ModelSerializer):
         if not Doer.objects.filter(user=req_user):
             raise serializers.ValidationError('Not authenticated or user taken.')
             
-        print(validated_data)
         user_serializer = self.fields['user_profile']
         user_instance = instance.user
-        user_data = validated_data.pop('user')
-        user_serializer.update(user_instance, user_data)
+        user_data = validated_data.get('user', None)
+        if user_data and user_instance:
+            user_serializer.update(user_instance, user_data)
         instance.phone_no = validated_data.get('phone_no', instance.phone_no)
         instance.profile_pic = validated_data.get('profile_pic', instance.profile_pic)
         instance.birth_date = validated_data.get('birth_date', instance.birth_date)
