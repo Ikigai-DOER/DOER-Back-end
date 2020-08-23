@@ -9,6 +9,7 @@ class Profession(models.Model):
     def __str__(self):
         return f'{self.title}'
 
+
 class Doer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name='Doer profile')
     phone_no = models.CharField(max_length=20, null=True, blank=True, verbose_name='Doer phone no')
@@ -18,18 +19,15 @@ class Doer(models.Model):
     number_rates = models.IntegerField(null=True, blank=True, default=0)
     professions = models.ManyToManyField(Profession, blank=True)
     AVAILABILITY_CHOICES = (
-       ('A', 'Available'),
-       ('B', 'Busy'),
-       ('U', 'Unavailable'),
+        ('A', 'Available'),
+        ('B', 'Busy'),
+        ('U', 'Unavailable'),
     )
     availability = models.CharField(null=True, blank=True, max_length=1, choices=AVAILABILITY_CHOICES)
 
-    @property
-    def username(self):
-        return self.user__username
-
     def __str__(self):
         return f'{self.user.username}'
+
 
 class Employer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name='Employer profile')
@@ -40,6 +38,7 @@ class Employer(models.Model):
 
     def __str__(self):
         return f'{self.user.username}'
+
 
 class Request(models.Model):
     title = models.CharField(max_length=1024)
@@ -52,15 +51,16 @@ class Request(models.Model):
     location = models.CharField(max_length=32, null=True, blank=True)
     price = models.DecimalField(max_digits=100, decimal_places=3, null=True, blank=True)
     STATUS_CHOICES = (
-       ('A', 'Available'),
-       ('C', 'Closed'),
-       ('D', 'Done'),
-       ('P', 'In progress'),
+        ('A', 'Available'),
+        ('C', 'Closed'),
+        ('D', 'Done'),
+        ('P', 'In progress'),
     )
     status = models.CharField(max_length=1, choices=STATUS_CHOICES)
 
     def __str__(self):
         return f'{self.id}: {self.title} from {self.employer.user.username}'
+
 
 class RequestSubmission(models.Model):
     doer = models.ForeignKey(Doer, on_delete=models.CASCADE)
@@ -98,9 +98,10 @@ class ReportProfile(models.Model):
     def __str__(self):
         return f'{self.id}: {self.profile.id}'
 
+
 class Message(models.Model):
     sender = models.ForeignKey(User, related_name='sender', on_delete=models.CASCADE)
-    receiver = models.ForeignKey(User, related_name='receiver',  on_delete=models.CASCADE)
+    receiver = models.ForeignKey(User, related_name='receiver', on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
     message = models.CharField(max_length=2048)
     read = models.BooleanField(default=False)
@@ -116,4 +117,3 @@ class Rating(models.Model):
 
     def __str__(self):
         return f'{self.rater.username} to {self.ratee.username}: {self.rate}'
-

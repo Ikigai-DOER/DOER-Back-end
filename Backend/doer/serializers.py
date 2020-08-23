@@ -18,7 +18,6 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
 
-# TODO: Fix update and create as in DoerSerializer
 class EmployerSerializer(serializers.ModelSerializer):
     user_profile = UserSerializer(source='user')
     user_id = serializers.IntegerField(write_only=True)
@@ -33,8 +32,8 @@ class EmployerSerializer(serializers.ModelSerializer):
         return Employer.objects.create(user=user, **validated_data)
 
     def validate_user_id(self, value):
-        #      if Employer.objects.filter(user_id=value) or Doer.objects.filter(user_id=value):
-        #         raise serializers.ValidationError('User is already taken.')
+        #       if Employer.objects.filter(user_id=value) or Doer.objects.filter(user_id=value):
+        #          raise serializers.ValidationError('User is already taken.')
         if not isinstance(value, int) or not User.objects.filter(id=value):
             raise serializers.ValidationError("Invalid user's id.")
         else:
@@ -43,23 +42,26 @@ class EmployerSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         req_user = self.context['request'].user
 
-        # if not req_user.is_authenticated or req_user != Employer.objects.filter(user=req_user).first():
-        #    raise serializers.ValidationError('Not authenticated or user taken.')
+        if not Employer.objects.filter(user=req_user):
+            raise serializers.ValidationError('Not authenticated or user taken.')
         user_serializer = self.fields['user_profile']
         user_instance = instance.user
-        user_data = validated_data.pop('user')
-        user_serializer.update(user_instance, user_data)
+        user_data = validated_data.get('user', None)
+        if user_data and user_instance:
+            user_serializer.update(user_instance, user_data)
         instance.phone_no = validated_data.get('phone_no', instance.phone_no)
         instance.profile_pic = validated_data.get('profile_pic', instance.profile_pic)
-        instance.favorite_doers.set(validated_data.get('favorite_doers', instance.favorite_doers.all()))
         instance.birth_date = validated_data.get('birth_date', instance.birth_date)
+        # TODO: Fix this
+        instance.favorite_doers.clear()
+        for doer in validated_data.get('favorite_doers', instance.favorite_doers):
+            instance.favorite_doers.add(doer)
         instance.save()
 
         return instance
 
 
 class DoerSerializer(serializers.ModelSerializer):
-    # USER PROFILE REQUIRED ON UPDATE
     user_profile = UserSerializer(source='user')
     user_rating = serializers.SerializerMethodField()
     user_id = serializers.IntegerField(write_only=True)
