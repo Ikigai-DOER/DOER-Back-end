@@ -18,6 +18,7 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
 
+# TODO: Fix update and create as in DoerSerializer
 class EmployerSerializer(serializers.ModelSerializer):
     user_profile = UserSerializer(source='user')
     user_id = serializers.IntegerField(write_only=True)
@@ -53,7 +54,7 @@ class EmployerSerializer(serializers.ModelSerializer):
         instance.favorite_doers.set(validated_data.get('favorite_doers', instance.favorite_doers.all()))
         instance.birth_date = validated_data.get('birth_date', instance.birth_date)
         instance.save()
-        
+
         return instance
 
 
@@ -67,7 +68,7 @@ class DoerSerializer(serializers.ModelSerializer):
         model = Doer
         fields = ['id', 'user_id',  'user_profile', 'birth_date', 'phone_no', 'profile_pic', 'average_mark', 'professions', 'availability', 'user_rating']
         read_only_fields = ('average_mark', 'user_rating')
-        
+
     def create(self, validated_data):
         user_id = validated_data.pop('user_id')
         user = User.objects.filter(id=user_id).first()
@@ -96,7 +97,6 @@ class DoerSerializer(serializers.ModelSerializer):
 
         if not Doer.objects.filter(user=req_user):
             raise serializers.ValidationError('Not authenticated or user taken.')
-            
         user_serializer = self.fields['user_profile']
         user_instance = instance.user
         user_data = validated_data.get('user', None)
@@ -105,6 +105,10 @@ class DoerSerializer(serializers.ModelSerializer):
         instance.phone_no = validated_data.get('phone_no', instance.phone_no)
         instance.profile_pic = validated_data.get('profile_pic', instance.profile_pic)
         instance.birth_date = validated_data.get('birth_date', instance.birth_date)
+        instance.availability = validated_data.get('availability', instance.availability)
+        for profession in validated_data.pop('professions'):
+            if not instance.professions.filter(pk=profession):
+                instance.professions.add(profession)
         instance.availability = validated_data.get('availability', instance.availability)
         instance.save()
 

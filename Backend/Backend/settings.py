@@ -121,6 +121,11 @@ REST_FRAMEWORK = {
  #       'djangorestframework_camel_case.render.CamelCaseJSONRenderer',
  #       'djangorestframework_camel_case.render.CamelCaseBrowsableAPIRenderer',
  #   ),
+    'DEFAULT_PARSER_CLASSES:': (
+        'rest_framework.parsers.JSONParser',
+        'rest_framework.parsers.FormParser',
+        'rest_framework.parsers.MultiPartParser',
+    ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
     ),
