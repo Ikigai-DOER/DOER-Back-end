@@ -25,7 +25,7 @@ class EmployerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Employer
-        fields = ['id', 'user_id',  'birth_date', 'phone_no', 'profile_pic', 'favorite_doers', 'user_profile']
+        fields = ['id', 'user_id', 'birth_date', 'phone_no', 'profile_pic', 'favorite_doers', 'user_profile']
 
     def create(self, validated_data):
         user_id = validated_data.pop('user_id')
@@ -33,8 +33,8 @@ class EmployerSerializer(serializers.ModelSerializer):
         return Employer.objects.create(user=user, **validated_data)
 
     def validate_user_id(self, value):
-  #      if Employer.objects.filter(user_id=value) or Doer.objects.filter(user_id=value):
-   #         raise serializers.ValidationError('User is already taken.')
+        #      if Employer.objects.filter(user_id=value) or Doer.objects.filter(user_id=value):
+        #         raise serializers.ValidationError('User is already taken.')
         if not isinstance(value, int) or not User.objects.filter(id=value):
             raise serializers.ValidationError("Invalid user's id.")
         else:
@@ -43,7 +43,7 @@ class EmployerSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         req_user = self.context['request'].user
 
-        #if not req_user.is_authenticated or req_user != Employer.objects.filter(user=req_user).first():
+        # if not req_user.is_authenticated or req_user != Employer.objects.filter(user=req_user).first():
         #    raise serializers.ValidationError('Not authenticated or user taken.')
         user_serializer = self.fields['user_profile']
         user_instance = instance.user
@@ -66,7 +66,8 @@ class DoerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Doer
-        fields = ['id', 'user_id',  'user_profile', 'birth_date', 'phone_no', 'profile_pic', 'average_mark', 'professions', 'availability', 'user_rating']
+        fields = ['id', 'user_id', 'user_profile', 'birth_date', 'phone_no', 'profile_pic', 'average_mark',
+                  'professions', 'availability', 'user_rating']
         read_only_fields = ('average_mark', 'user_rating')
 
     def create(self, validated_data):
@@ -76,8 +77,8 @@ class DoerSerializer(serializers.ModelSerializer):
 
     # FIX: if update don't do the check? (doer too)
     def validate_user_id(self, value):
- #       if Employer.objects.filter(user_id=value) or Doer.objects.filter(user_id=value):
-  #          raise serializers.ValidationError('User is already taken.')
+        #       if Employer.objects.filter(user_id=value) or Doer.objects.filter(user_id=value):
+        #          raise serializers.ValidationError('User is already taken.')
         if not isinstance(value, int) or not User.objects.filter(id=value):
             raise serializers.ValidationError("Invalid user's id.")
         else:
@@ -89,7 +90,8 @@ class DoerSerializer(serializers.ModelSerializer):
         else:
             return
 
-        if request_user.is_authenticated and (rating := Rating.objects.filter(rater=request_user, ratee=obj.user).first()):
+        if request_user.is_authenticated and (
+        rating := Rating.objects.filter(rater=request_user, ratee=obj.user).first()):
             return rating.rate
 
     def update(self, instance, validated_data):
@@ -106,9 +108,12 @@ class DoerSerializer(serializers.ModelSerializer):
         instance.profile_pic = validated_data.get('profile_pic', instance.profile_pic)
         instance.birth_date = validated_data.get('birth_date', instance.birth_date)
         instance.availability = validated_data.get('availability', instance.availability)
-        for profession in validated_data.pop('professions'):
-            if not instance.professions.filter(pk=profession):
-                instance.professions.add(profession)
+        # should be fixed, pretty bad
+        instance.professions.clear()
+        professions = validated_data.get('professions', instance.professions)
+        for profession in professions:
+            instance.professions.add(profession)
+
         instance.availability = validated_data.get('availability', instance.availability)
         instance.save()
 
@@ -126,7 +131,8 @@ class RequestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Request
-        fields = ['id', 'title', 'employer', 'description', 'professions', 'doer', 'publication_date', 'expiration_date', 'location', 'price', 'status']
+        fields = ['id', 'title', 'employer', 'description', 'professions', 'doer', 'publication_date',
+                  'expiration_date', 'location', 'price', 'status']
 
     def create(self, validated_data):
         request_user = self.context['request'].user
@@ -148,7 +154,6 @@ class RequestSubmissionSerializer(serializers.ModelSerializer):
 
         if doer := Doer.objects.filter(user=request_user).first():
             return RequestSubmission.objects.create(doer=doer, **validated_data)
-
 
 
 class ReportRequestSerializer(serializers.ModelSerializer):
@@ -187,18 +192,17 @@ class PersonalRequestsSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-
 class CustomRegisterSerializer(RegisterSerializer):
     first_name = serializers.CharField()
     last_name = serializers.CharField()
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'first_name','last_name',
-        'password1', 'password2',]
+        fields = ['username', 'email', 'first_name', 'last_name',
+                  'password1', 'password2', ]
         extra_kwargs = {
             'password': {
-                'write_only':True
+                'write_only': True
             }
         }
 
@@ -213,4 +217,3 @@ class CustomRegisterSerializer(RegisterSerializer):
             'password2': self.validated_data.get('password2', ''),
             'email': self.validated_data.get('email', ''),
         }
-
