@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from rest_framework.decorators import api_view, permission_classes
 from django.http import HttpResponse, JsonResponse
 from rest_framework import viewsets
+from rest_framework import generics
 from django.core import serializers as core_serializers
 from django.http import JsonResponse
 from .serializers import *
@@ -21,6 +22,23 @@ def AccountConfirmView(request, token):
     return render(request, 'doer/verification.html', {'token': token})
 
 
+# TODO: test it out
+class SubmissionsByRequestList(generics.ListAPIView):
+    queryset = RequestSubmission.objects.all()
+    serializer_class = RequestSubmissionSerializer
+    permission_classes= [IsAuthenticated]
+
+    def list(self, request):
+        request_id = request.GET.get('requestId', None)
+
+        if not request_id:
+            return JsonResponse({'error': 'Invalid request id.'}, status=400)
+
+        queryset = self.get_queryset().filter(request=request_id)
+        serializer = RequestSubmissionSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+
 # TODO: Merge remove and add in one function mby?
 @csrf_exempt
 @api_view(['POST'])
@@ -29,7 +47,7 @@ def RemoveFavoriteDoerView(request):
     doer_id = request.GET.get('doerId', None)
 
     if not doer_id:
-        return JsonResponse({'error': 'Invalid id.'}, status=400)
+        return JsonResponse({'error': 'Invalid doer id.'}, status=400)
 
     req_user = request.user
     if (employer := Employer.objects.filter(user=req_user)) and (doer := Doer.objects.filter(user_id=doer_id)):
@@ -49,7 +67,7 @@ def AddFavoriteDoerView(request):
     doer_id = request.GET.get('doerId', None)
 
     if not doer_id:
-        return JsonResponse({'error': 'Invalid id.'}, status=400)
+        return JsonResponse({'error': 'Invalid doer id.'}, status=400)
 
     req_user = request.user
     if (employer := Employer.objects.filter(user=req_user)) and (doer := Doer.objects.filter(user_id=doer_id)):
@@ -90,7 +108,7 @@ def UserInfoView(request):
     user_id = request.GET.get('userId', None)
 
     if not user_id:
-        return HttpResponse(status=400)
+        return JsonResponse({'error':'Invalid user id.'}, status=400)
 
     if doer := Doer.objects.filter(user_id=user_id):
         return JsonResponse({'user': DoerSerializer(doer.first()).data, 'doer': True})
@@ -98,7 +116,7 @@ def UserInfoView(request):
     if employer := Employer.objects.filter(user_id=user_id):
         return JsonResponse({'user': EmployerSerializer(employer.first()).data, 'doer': False})
 
-    return HttpResponse(status=404)
+        return JsonResponse({'message':'User not found.'}, status=404)
 
 @csrf_exempt
 @api_view(['POST'])
@@ -118,12 +136,11 @@ def RateDoerView(request):
         else:
             rating_obj = Rating.objects.create(rater=request.user, ratee=doer.user, rate=rate)
             doer.number_rates += 1
- #           try:
             doer.average_mark = ((float(doer.average_mark) or 0) + float(rate)) / float(doer.number_rates)
 
         rating_obj.save()
         doer.save()
-        return HttpResponse(status=200)
+        return JsonResponse({'message': 'Successfully rated a doer.'}, status=200)
 
     return HttpResponse(status=400)
 
