@@ -121,6 +121,11 @@ REST_FRAMEWORK = {
  #       'djangorestframework_camel_case.render.CamelCaseJSONRenderer',
  #       'djangorestframework_camel_case.render.CamelCaseBrowsableAPIRenderer',
  #   ),
+    'DEFAULT_PARSER_CLASSES:': (
+        'rest_framework.parsers.JSONParser',
+        'rest_framework.parsers.FormParser',
+        'rest_framework.parsers.MultiPartParser',
+    ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
     ),
@@ -138,13 +143,6 @@ REST_AUTH_REGISTER_SERIALIZERS = {
 REST_USE_JWT = True
 
 JWT_AUTH_COOKIE = 'auth'
-
-
-ACCOUNT_EMAIL_VERIFICATION = 'none'
-
-ACCOUNT_AUTHENTICATION_METHOD = 'username'
-
-ACCOUNT_EMAIL_REQUIRED = False
 
 
 # Internationalization
@@ -174,4 +172,21 @@ MEDIA_ROOT = os.path.join(os.getcwd(), 'upload/profile_pictures')
 
 # Static root
 # STATIC_ROOT = os.path.join(os.getcwd(), 'upload/profile_pictures/')
+
+# Email
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'softprojekat2020'
+EMAIL_HOST_PASSWORD = 'testtest123123'
+
+# Verification
+
+ACCOUNT_EMAIL_VERIFICATION = 'optional'
+
+ACCOUNT_AUTHENTICATION_METHOD = 'username'
+
+ACCOUNT_EMAIL_REQUIRED = True
+
+ACCOUNT_USERNAME_REQUIRED = False
 

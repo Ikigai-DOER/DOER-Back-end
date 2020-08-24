@@ -4,6 +4,7 @@ from dj_rest_auth.serializers import LoginSerializer
 from .models import *
 from pprint import pprint
 from django.contrib.auth.models import User
+from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import IntegrityError
 import json
 
@@ -12,10 +13,14 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'first_name', 'last_name', 'email', 'date_joined', 'last_login']
+        extra_kwargs = {
+            'username': {'validators': []},
+        }
 
 
+# TODO: Fix update and create as in DoerSerializer
 class EmployerSerializer(serializers.ModelSerializer):
-    user_profile = UserSerializer(read_only=True, source='user')
+    user_profile = UserSerializer(source='user')
     user_id = serializers.IntegerField(write_only=True)
 
     class Meta:
@@ -23,6 +28,7 @@ class EmployerSerializer(serializers.ModelSerializer):
         fields = ['id', 'user_id',  'birth_date', 'phone_no', 'profile_pic', 'favorite_doers', 'user_profile']
 
     def create(self, validated_data):
+        validated_data.pop('user')
         user_id = validated_data.pop('user_id')
         user = User.objects.filter(id=user_id).first()
         return Employer.objects.create(user=user, **validated_data)
@@ -40,22 +46,22 @@ class EmployerSerializer(serializers.ModelSerializer):
 
         #if not req_user.is_authenticated or req_user != Employer.objects.filter(user=req_user).first():
         #    raise serializers.ValidationError('Not authenticated or user taken.')
-
-        instance.user.username = validated_data.get('username', instance.user.username)
-        instance.user.first_name = validated_data.get('first_name', instance.user.first_name)
-        instance.user.last_name = validated_data.get('last_name', instance.user.last_name)
-        instance.user.email = validated_data.get('email', instance.user.email)
+        user_serializer = self.fields['user_profile']
+        user_instance = instance.user
+        user_data = validated_data.pop('user')
+        user_serializer.update(user_instance, user_data)
         instance.phone_no = validated_data.get('phone_no', instance.phone_no)
         instance.profile_pic = validated_data.get('profile_pic', instance.profile_pic)
         instance.favorite_doers.set(validated_data.get('favorite_doers', instance.favorite_doers.all()))
         instance.birth_date = validated_data.get('birth_date', instance.birth_date)
         instance.save()
-        
+
         return instance
 
 
 class DoerSerializer(serializers.ModelSerializer):
-    user_profile = UserSerializer(read_only=True, source='user')
+    # USER PROFILE REQUIRED ON UPDATE
+    user_profile = UserSerializer(source='user')
     user_rating = serializers.SerializerMethodField()
     user_id = serializers.IntegerField(write_only=True)
 
@@ -63,8 +69,9 @@ class DoerSerializer(serializers.ModelSerializer):
         model = Doer
         fields = ['id', 'user_id',  'user_profile', 'birth_date', 'phone_no', 'profile_pic', 'average_mark', 'professions', 'availability', 'user_rating']
         read_only_fields = ('average_mark', 'user_rating')
-        
+
     def create(self, validated_data):
+        validated_data.pop('user')
         user_id = validated_data.pop('user_id')
         user = User.objects.filter(id=user_id).first()
         return Doer.objects.create(user=user, **validated_data)
@@ -90,16 +97,20 @@ class DoerSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         req_user = self.context['request'].user
 
-        if not req_user.is_authenticated or req_user != Doer.objects.filter(user=req_user).first():
+        if not Doer.objects.filter(user=req_user):
             raise serializers.ValidationError('Not authenticated or user taken.')
-
-        instance.user.username = validated_data.get('username', instance.user.username)
-        instance.user.first_name = validated_data.get('first_name', instance.user.first_name)
-        instance.user.last_name = validated_data.get('last_name', instance.user.last_name)
-        instance.user.email = validated_data.get('email', instance.user.email)
+        user_serializer = self.fields['user_profile']
+        user_instance = instance.user
+        user_data = validated_data.get('user', None)
+        if user_data and user_instance:
+            user_serializer.update(user_instance, user_data)
         instance.phone_no = validated_data.get('phone_no', instance.phone_no)
         instance.profile_pic = validated_data.get('profile_pic', instance.profile_pic)
         instance.birth_date = validated_data.get('birth_date', instance.birth_date)
+        instance.availability = validated_data.get('availability', instance.availability)
+        for profession in validated_data.pop('professions'):
+            if not instance.professions.filter(pk=profession):
+                instance.professions.add(profession)
         instance.availability = validated_data.get('availability', instance.availability)
         instance.save()
 

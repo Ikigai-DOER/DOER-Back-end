@@ -11,9 +11,13 @@ from django.http import JsonResponse
 from .serializers import *
 from .models import *
 from django.conf import settings
+from django.shortcuts import render
 import os
 import magic
 
+@csrf_exempt
+def AccountConfirmView(request, token):
+    return render(request, 'doer/verification.html', {'token': token})
 
 @csrf_exempt
 @api_view(['GET'])
