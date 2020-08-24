@@ -145,13 +145,6 @@ REST_USE_JWT = True
 JWT_AUTH_COOKIE = 'auth'
 
 
-ACCOUNT_EMAIL_VERIFICATION = 'none'
-
-ACCOUNT_AUTHENTICATION_METHOD = 'username'
-
-ACCOUNT_EMAIL_REQUIRED = False
-
-
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
 
@@ -179,4 +172,21 @@ MEDIA_ROOT = os.path.join(os.getcwd(), 'upload/profile_pictures')
 
 # Static root
 # STATIC_ROOT = os.path.join(os.getcwd(), 'upload/profile_pictures/')
+
+# Email
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'softprojekat2020'
+EMAIL_HOST_PASSWORD = 'testtest123123'
+
+# Verification
+
+ACCOUNT_EMAIL_VERIFICATION = 'optional'
+
+ACCOUNT_AUTHENTICATION_METHOD = 'username'
+
+ACCOUNT_EMAIL_REQUIRED = True
+
+ACCOUNT_USERNAME_REQUIRED = False
 
