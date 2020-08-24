@@ -3,8 +3,9 @@ from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.models import User
 from rest_framework.decorators import api_view, permission_classes
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from rest_framework import viewsets
 from django.core import serializers as core_serializers
 from django.http import JsonResponse
@@ -20,6 +21,15 @@ def AccountConfirmView(request, token):
     return render(request, 'doer/verification.html', {'token': token})
 
 @csrf_exempt
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def DeactivateProfileView(request):
+    req_user = request.user
+    req_user.is_active = False
+    req_user.save()
+    return JsonResponse({'message': 'The profile has been successfully deactivated'}, status=200)
+
+
 @api_view(['GET'])
 def ProfilePicturesView(request, picture_name):
     try:
@@ -38,7 +48,7 @@ def ProfilePicturesView(request, picture_name):
 @permission_classes([IsAuthenticated])
 def UserInfoView(request):
     user_id = request.GET.get('userId', None)
-    
+
     if not user_id:
         return HttpResponse(status=400)
 
