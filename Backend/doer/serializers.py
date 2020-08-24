@@ -28,6 +28,7 @@ class EmployerSerializer(serializers.ModelSerializer):
         fields = ['id', 'user_id',  'birth_date', 'phone_no', 'profile_pic', 'favorite_doers', 'user_profile']
 
     def create(self, validated_data):
+        validated_data.pop('user')
         user_id = validated_data.pop('user_id')
         user = User.objects.filter(id=user_id).first()
         return Employer.objects.create(user=user, **validated_data)
@@ -70,6 +71,7 @@ class DoerSerializer(serializers.ModelSerializer):
         read_only_fields = ('average_mark', 'user_rating')
 
     def create(self, validated_data):
+        validated_data.pop('user')
         user_id = validated_data.pop('user_id')
         user = User.objects.filter(id=user_id).first()
         return Doer.objects.create(user=user, **validated_data)
