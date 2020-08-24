@@ -133,6 +133,7 @@ class RequestSubmissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = RequestSubmission
         fields = '__all__'
+        read_only_fields = ('doer',)
 
     def create(self, validated_data):
         request_user = self.context['request'].user
