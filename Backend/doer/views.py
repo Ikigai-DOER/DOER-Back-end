@@ -20,6 +20,48 @@ import magic
 def AccountConfirmView(request, token):
     return render(request, 'doer/verification.html', {'token': token})
 
+
+# TODO: Merge remove and add in one function mby?
+@csrf_exempt
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def RemoveFavoriteDoerView(request):
+    doer_id = request.GET.get('doerId', None)
+
+    if not doer_id:
+        return JsonResponse({'error': 'Invalid id.'}, status=400)
+
+    req_user = request.user
+    if (employer := Employer.objects.filter(user=req_user)) and (doer := Doer.objects.filter(user_id=doer_id)):
+        employer = employer.first()
+        doer = doer.first()
+        employer.favorite_doers.remove(doer)
+        employer.save()
+        return JsonResponse({'message': 'Successfully removed doer from favorites'}, status=200)
+
+    return JsonResponse({'error': 'Only employers can remove doers from favorites.'}, status=400)
+
+
+@csrf_exempt
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def AddFavoriteDoerView(request):
+    doer_id = request.GET.get('doerId', None)
+
+    if not doer_id:
+        return JsonResponse({'error': 'Invalid id.'}, status=400)
+
+    req_user = request.user
+    if (employer := Employer.objects.filter(user=req_user)) and (doer := Doer.objects.filter(user_id=doer_id)):
+        employer = employer.first()
+        doer = doer.first()
+        employer.favorite_doers.add(doer)
+        employer.save()
+        return JsonResponse({'message': 'Successfully added a doer to favorites'}, status=200)
+
+    return JsonResponse({'error': 'Only employers can add doers to favorites.'}, status=400)
+
+
 @csrf_exempt
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -33,9 +75,7 @@ def DeactivateProfileView(request):
 @api_view(['GET'])
 def ProfilePicturesView(request, picture_name):
     try:
-        print(settings.MEDIA_ROOT)
         path_to_pic = os.path.join(settings.MEDIA_ROOT, picture_name)
-        print(path_to_pic)
         with open(path_to_pic, "rb") as f:
             mime_type = magic.from_file(path_to_pic, mime=True)
             return HttpResponse(f.read(), content_type=mime_type)
