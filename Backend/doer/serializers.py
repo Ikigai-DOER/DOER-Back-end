@@ -176,7 +176,9 @@ class ReportProfileSerializer(serializers.ModelSerializer):
 class MessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
-        fields = ['receiver', 'timestamp', 'message', 'read']
+        fields = ['receiver', 'sender', 'timestamp', 'message', 'read']
+        read_only_fields = ('sender')
+        ordering = ['-read', 'timestamp']
 
     def create(self, validated_data):
         request_user = self.context['request'].user

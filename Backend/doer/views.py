@@ -12,6 +12,7 @@ from .serializers import *
 from .models import *
 from django.conf import settings
 from django.shortcuts import render
+from django.db.models import Q
 import os
 import magic
 
@@ -108,9 +109,9 @@ class PersonalRequestsViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         if doer := Doer.objects.filter(user=self.request.user):
-            return Request.objects.filter(doer=doer.first())
+            return self.queryset.filter(doer=doer.first())
         elif employer := Employer.objects.filter(user=self.request.user):
-            return Request.objects.filter(employer=employer.first())
+            return self.queryset.filter(employer=employer.first())
 
 
 class RequestSubmissionViewSet(viewsets.ModelViewSet):
@@ -136,13 +137,15 @@ class MessageViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = MessageSerializer
 
+    def get_queryset(self):
+        req_user = self.request.user
+        return self.queryset.filter(Q(sender=req_user) | Q(receiver=req_user))
 
 class RequestSearchViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
 
     def list(self, request):
         filter_professions = request.GET.get('professions', []).split(',')
-        print(filter_professions)
         queryset = Request.objects.all().filter(professions__in=filter_professions)
         serializer = RequestSearchSerializer(queryset, many=True)
         return Response(serializer.data)
