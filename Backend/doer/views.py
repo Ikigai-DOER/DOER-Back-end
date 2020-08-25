@@ -171,6 +171,7 @@ class RequestViewSet(viewsets.ModelViewSet):
 
 
 class PersonalRequestsViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Request.objects.all()
     permission_classes = [IsAuthenticated]
     serializer_class = PersonalRequestsSerializer
 
