@@ -223,3 +223,11 @@ class CustomRegisterSerializer(RegisterSerializer):
             'password2': self.validated_data.get('password2', ''),
             'email': self.validated_data.get('email', ''),
         }
+
+
+class MyRequestsListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Request
+        fields = ['id', 'title', 'employer', 'description', 'professions', 'doer', 'publication_date',
+                  'expiration_date', 'location', 'price', 'status']
+
