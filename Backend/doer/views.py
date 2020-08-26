@@ -25,7 +25,7 @@ def AccountConfirmView(request, token):
 
 class MyRequestsList(generics.ListAPIView):
     queryset = Request.objects.all()
-    serializer_class = MyRequestsList
+    serializer_class = MyRequestsListSerializer
     permission_classes = [IsAuthenticated]
 
     def list(self, request):

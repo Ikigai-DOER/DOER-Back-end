@@ -24,6 +24,7 @@ urlpatterns = [
     path('add-favorite-doer/', AddFavoriteDoerView),
     path('remove-favorite-doer/', RemoveFavoriteDoerView),
     path('submissions-by-request/', SubmissionsByRequestList.as_view()),
+    path('my-requests-list/', MyRequestsList.as_view()),
     path('user-info/', UserInfoView),
     url(r'^profile-pictures/(?P<picture_name>[\w.]{0,256})$', ProfilePicturesView)
 ]
