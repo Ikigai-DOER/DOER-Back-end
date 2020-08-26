@@ -23,11 +23,22 @@ def AccountConfirmView(request, token):
     return render(request, 'doer/verification.html', {'token': token})
 
 
-# TODO: test it out
+class MyRequestsList(generics.ListAPIView):
+    queryset = Request.objects.all()
+    serializer_class = MyRequestsList
+    permission_classes = [IsAuthenticated]
+
+    def list(self, request):
+        request_user = self.request.user
+        queryset = [req_sub.request for req_sub in RequestSubmissions.objects.all() if req_sub.request.doer.user == request_user]
+        serializer = RequestSerializer(queryset, many=True)
+        return JsonResponse(serializer.data)
+
+
 class SubmissionsByRequestList(generics.ListAPIView):
     queryset = RequestSubmission.objects.all()
     serializer_class = RequestSubmissionSerializer
-    permission_classes= [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def list(self, request):
         request_id = request.GET.get('requestId', None)
@@ -37,7 +48,7 @@ class SubmissionsByRequestList(generics.ListAPIView):
 
         queryset = self.get_queryset().filter(request=request_id)
         serializer = RequestSubmissionSerializer(queryset, many=True)
-        return Response(serializer.data)
+        return JsonResponse(serializer.data)
 
 
 # TODO: Merge remove and add in one function mby?
