@@ -107,7 +107,7 @@ class Message(models.Model):
     read = models.BooleanField(default=False)
 
     def __str__(self):
-        return f'{self.sender.user.username} to {self.receiver.user.username}: {self.message}'
+        return f'{self.sender.username} to {self.receiver.username}: {self.message}'
 
 
 class Rating(models.Model):

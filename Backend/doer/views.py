@@ -111,13 +111,16 @@ def UserInfoView(request):
     if not user_id:
         return JsonResponse({'error':'Invalid user id.'}, status=400)
 
-    if doer := Doer.objects.filter(user_id=user_id):
-        return JsonResponse({'user': DoerSerializer(doer.first()).data, 'doer': True})
+    if user := User.objects.filter(pk=user_id):
+        user = user.first()
+        if doer := Doer.objects.filter(user=user):
+            return JsonResponse({'user': DoerSerializer(doer.first()).data, 'doer': True})
 
-    if employer := Employer.objects.filter(user_id=user_id):
-        return JsonResponse({'user': EmployerSerializer(employer.first()).data, 'doer': False})
+        if employer := Employer.objects.filter(user=user):
+            return JsonResponse({'user': EmployerSerializer(employer.first()).data, 'doer': False})
 
-        return JsonResponse({'message':'User not found.'}, status=404)
+    return JsonResponse({'message':'User not found.'}, status=404)
+
 
 @csrf_exempt
 @api_view(['POST'])
@@ -132,14 +135,15 @@ def RateDoerView(request):
     if doer := Doer.objects.filter(id=ratee):
         doer = doer.first()
         if rating_obj := Rating.objects.filter(rater=request.user, ratee=doer.user):
+            rating_obj = rating_obj.first()
             rating_obj.rate = rate
-            doer.average_mark = float(doer.average_mark) * doer.number_rates - (float(doer.average_mark) - float(rate))
+            doer.average_mark = float(doer.average_mark or 0) * doer.number_rates - (float(doer.average_mark or 0) - float(rate))
+            rating_obj.save()
         else:
             rating_obj = Rating.objects.create(rater=request.user, ratee=doer.user, rate=rate)
             doer.number_rates += 1
-            doer.average_mark = ((float(doer.average_mark) or 0) + float(rate)) / float(doer.number_rates)
+            doer.average_mark = ((float(doer.average_mark or 0)) + float(rate)) / float(doer.number_rates or 0)
 
-        rating_obj.save()
         doer.save()
         return JsonResponse({'message': 'Successfully rated a doer.'}, status=200)
 
@@ -171,6 +175,7 @@ class RequestViewSet(viewsets.ModelViewSet):
 
 
 class PersonalRequestsViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Request.objects.all()
     permission_classes = [IsAuthenticated]
     serializer_class = PersonalRequestsSerializer
 
@@ -206,7 +211,7 @@ class MessageViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         req_user = self.request.user
-        return self.queryset.filter(Q(sender=req_user) | Q(receiver=req_user))
+        return self.queryset.filter(Q(sender=req_user) | Q(receiver=req_user)).order_by('timestamp')
 
 class RequestSearchViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]

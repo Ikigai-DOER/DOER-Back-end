@@ -177,13 +177,12 @@ class MessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
         fields = ['receiver', 'sender', 'timestamp', 'message', 'read']
-        read_only_fields = ('sender')
-        ordering = ['-read', 'timestamp']
+        read_only_fields = ('sender',)
 
     def create(self, validated_data):
         request_user = self.context['request'].user
 
-        if User.objects.filter(id=request_user.id).first():
+        if User.objects.filter(pk=request_user.id).first():
             return Message.objects.create(sender=request_user, **validated_data)
 
 
