@@ -165,12 +165,14 @@ class ReportRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReportRequest
         fields = '__all__'
+        read_only_fields = ('report_status',)
 
 
 class ReportProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReportProfile
         fields = '__all__'
+        read_only_fields = ('report_status',)
 
 
 class MessageSerializer(serializers.ModelSerializer):

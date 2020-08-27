@@ -16,6 +16,7 @@ from django.conf import settings
 from django.shortcuts import render
 from django.db.models import Q
 import os
+import math
 import magic
 
 @csrf_exempt
@@ -30,9 +31,9 @@ class MyRequestsList(generics.ListAPIView):
 
     def list(self, request):
         request_user = self.request.user
-        queryset = [req_sub.request for req_sub in RequestSubmissions.objects.all() if req_sub.request.doer.user == request_user]
+        queryset = [req_sub.request for req_sub in RequestSubmission.objects.all() if req_sub.doer and req_sub.doer.user == request_user]
         serializer = RequestSerializer(queryset, many=True)
-        return JsonResponse(serializer.data)
+        return Response(serializer.data)
 
 
 class SubmissionsByRequestList(generics.ListAPIView):
@@ -48,7 +49,7 @@ class SubmissionsByRequestList(generics.ListAPIView):
 
         queryset = self.get_queryset().filter(request=request_id)
         serializer = RequestSubmissionSerializer(queryset, many=True)
-        return JsonResponse(serializer.data)
+        return Response(serializer.data)
 
 
 # TODO: Merge remove and add in one function mby?
@@ -62,7 +63,7 @@ def RemoveFavoriteDoerView(request):
         return JsonResponse({'error': 'Invalid doer id.'}, status=400)
 
     req_user = request.user
-    if (employer := Employer.objects.filter(user=req_user)) and (doer := Doer.objects.filter(user_id=doer_id)):
+    if (employer := Employer.objects.filter(user=req_user)) and (doer := Doer.objects.filter(id=doer_id)):
         employer = employer.first()
         doer = doer.first()
         employer.favorite_doers.remove(doer)
@@ -82,7 +83,7 @@ def AddFavoriteDoerView(request):
         return JsonResponse({'error': 'Invalid doer id.'}, status=400)
 
     req_user = request.user
-    if (employer := Employer.objects.filter(user=req_user)) and (doer := Doer.objects.filter(user_id=doer_id)):
+    if (employer := Employer.objects.filter(user=req_user)) and (doer := Doer.objects.filter(id=doer_id)):
         employer = employer.first()
         doer = doer.first()
         employer.favorite_doers.add(doer)
@@ -180,7 +181,7 @@ class ProfessionViewSet(viewsets.ModelViewSet):
 
 
 class RequestViewSet(viewsets.ModelViewSet):
-    queryset = Request.objects.all()
+    queryset = Request.objects.all().order_by('-id')
     permission_classes = [IsAuthenticated]
     serializer_class = RequestSerializer
 
@@ -229,7 +230,14 @@ class RequestSearchViewSet(viewsets.ViewSet):
 
     def list(self, request):
         filter_professions = request.GET.get('professions', []).split(',')
-        queryset = Request.objects.all().filter(professions__in=filter_professions)
+        min = request.GET.get('min', 0)
+        max = request.GET.get('max', math.inf)
+        query = request.GET.get('query', '')
+
+        queryset = Request.objects.all().filter(professions__in=filter_professions) if filter_professions != [''] else Request.objects.all()
+        queryset = queryset.filter(price__gte=min, price__lte=max)
+        queryset = queryset.filter(Q(title__icontains=query) | Q(description__icontains=query))
         serializer = RequestSearchSerializer(queryset, many=True)
+
         return Response(serializer.data)
 
