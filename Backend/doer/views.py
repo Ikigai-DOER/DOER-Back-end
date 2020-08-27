@@ -30,9 +30,9 @@ class MyRequestsList(generics.ListAPIView):
 
     def list(self, request):
         request_user = self.request.user
-        queryset = [req_sub.request for req_sub in RequestSubmissions.objects.all() if req_sub.request.doer.user == request_user]
+        queryset = [req_sub.request for req_sub in RequestSubmission.objects.all() if req_sub.request.doer and req_sub.request.doer.user == request_user]
         serializer = RequestSerializer(queryset, many=True)
-        return JsonResponse(serializer.data)
+        return Response(serializer.data)
 
 
 class SubmissionsByRequestList(generics.ListAPIView):
@@ -48,7 +48,7 @@ class SubmissionsByRequestList(generics.ListAPIView):
 
         queryset = self.get_queryset().filter(request=request_id)
         serializer = RequestSubmissionSerializer(queryset, many=True)
-        return JsonResponse(serializer.data)
+        return Response(serializer.data)
 
 
 # TODO: Merge remove and add in one function mby?
@@ -180,7 +180,7 @@ class ProfessionViewSet(viewsets.ModelViewSet):
 
 
 class RequestViewSet(viewsets.ModelViewSet):
-    queryset = Request.objects.all()
+    queryset = Request.objects.all().order_by('-id')
     permission_classes = [IsAuthenticated]
     serializer_class = RequestSerializer
 
