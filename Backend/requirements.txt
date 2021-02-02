@@ -32,7 +32,7 @@ bcrypt==3.1.7
 beautifulsoup4==4.9.1
 binwalk==2.2.0
 bitstring==3.1.5
-bleach==3.1.5
+bleach==3.3.0
 blinker==1.4
 boltons==19.1.0
 bottle==0.12.15
