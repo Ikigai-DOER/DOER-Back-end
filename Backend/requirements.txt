@@ -136,7 +136,7 @@ hyperlink==19.0.0
 icalendar==4.0.3
 idna==2.8
 imageio==2.4.1
-impacket==0.9.21
+impacket==0.9.23
 importlib-metadata==1.6.0
 incremental==16.10.1
 intervaltree==3.0.2
