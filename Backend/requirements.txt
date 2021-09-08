@@ -232,7 +232,7 @@ pefile==2019.4.18
 pexpect==4.6.0
 pgspecial==1.9.0
 pickleshare==0.7.5
-Pillow==6.2.1
+Pillow==8.3.2
 pipenv==11.9.0
 plaster==1.0
 plaster-pastedeploy==0.5
