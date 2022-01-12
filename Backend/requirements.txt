@@ -75,7 +75,7 @@ django-cors-headers==3.2.1
 djangorestframework==3.11.0
 djangorestframework-camel-case==1.1.2
 djangorestframework-simplejwt==4.4.0
-dnslib==0.9.14
+dnslib==0.9.17
 dnspython==1.16.0
 EasyProcess==0.2.5
 ecdsa==0.15
