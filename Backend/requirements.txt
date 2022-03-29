@@ -217,7 +217,7 @@ ospd==2.0.1
 ospd-openvas==1.0.1
 packaging==20.4
 pandocfilters==1.4.2
-paramiko==2.7.1
+paramiko==2.10.1
 parsedatetime==2.4
 parsero==0.82
 parso==0.7.0
