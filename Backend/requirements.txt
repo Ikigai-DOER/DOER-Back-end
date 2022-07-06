@@ -167,7 +167,7 @@ LibAppArmor==2.13.4
 libvirt-python==6.1.0
 logutils==0.3.3
 lsassy==2.1.2
-lxml==4.5.2
+lxml==4.9.1
 lz4==3.0.2+dfsg
 Mako==1.1.2
 Markdown==3.2.2
