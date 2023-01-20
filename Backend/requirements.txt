@@ -178,7 +178,7 @@ mate-menu==20.4.1
 mate-tweak==20.4.0
 matplotlib==3.2.2
 maxminddb==1.4.1
-mechanize==0.4.5
+mechanize==0.4.6
 meld==3.20.2
 mercurial==5.4.1
 mimerender==0.6.0
